@@ -1,6 +1,6 @@
-8bf1a921c4bedc82a14e27b1e3845bd6 *DESCRIPTION
+d15c6bb1771fd8e74b0004d7ab787cdd *DESCRIPTION
 5c1d5aae0fe18d7755edf4a9ba07627f *NAMESPACE
-b07d1f24cfcf41727378b4f99a2c42fd *NEWS.md
+898c27edc0c6a3bc7b9d4a7b4f8c5c56 *NEWS.md
 dfbd66fa7db62983b68591d50af985cc *R/covid_keys.R
 9895b030cec4d2b307ebfb73b8948637 *R/opi_impact.R
 3ebac5e68197ed8aad02c40e42ecfd90 *R/opi_score.R
@@ -11,14 +11,14 @@ abb9b5b4092c8f8d33b1ede77ceef980 *R/sysdata.rda
 6f86faa10ef0151009768cbdb233ad7a *R/tweets.R
 48f29818dc6daf7ad915d211e17875b9 *R/word_distrib.R
 b21c961d778c7ab10a6914a6de3e5208 *README.md
-30e0ecde70a39f3b17f75c87ee5ad79e *build/vignette.rds
+fd21458dd4990bdf9e26cc45b2da94fb *build/vignette.rds
 ef515756b75209417c148c34562f6aa8 *data/covid_keys.rda
 1f46c11e7ba6cb4cc10376d944d91b0b *data/osd_data.rda
 ebd75395fb795ca6823ecb09980e001f *data/policing_otd.rda
 07a1052eeccfa478d4d976d97dbf46af *data/tweets.rda
 81d81b287808ac45f9a7624437663f7f *inst/doc/opitools-vignette.R
-20566a66079b585534acad499cfca3a3 *inst/doc/opitools-vignette.Rmd
-dd0e86cb5ae310e9654f3e96d8a07482 *inst/doc/opitools-vignette.html
+ce4e634fd57b69d404d9843a0b87a8d8 *inst/doc/opitools-vignette.Rmd
+95ff3592bef76eff3a8f355e8f19cb76 *inst/doc/opitools-vignette.html
 d7a374b141a146712c7b5c6765f513b7 *man/covid_keys.Rd
 67a6b590f1f5d96be8b50c37506d648e *man/opi_impact.Rd
 7142b06c9c0c19ca4ada5ad23cc04e9a *man/opi_score.Rd
@@ -28,7 +28,7 @@ d7a374b141a146712c7b5c6765f513b7 *man/covid_keys.Rd
 3fb97efac938f048b98bc2319615661b *man/tweets.Rd
 2febcb96b190324b48207c7441d7ae9e *man/word_distrib.Rd
 fdecd3d17634f33c33cba322d11371db *vignettes/likert.png
-20566a66079b585534acad499cfca3a3 *vignettes/opitools-vignette.Rmd
+ce4e634fd57b69d404d9843a0b87a8d8 *vignettes/opitools-vignette.Rmd
 73a9c575718fd016538b403a7f3ecab2 *vignettes/references.bib
 d048b0918fbd2dc92933a803ca2e2722 *vignettes/wordcloud.png
 65be7264b795eccda9807e5a7af59e7f *vignettes/zipf.png

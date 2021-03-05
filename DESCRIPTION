@@ -1,7 +1,7 @@
 Package: opitools
 Type: Package
 Title: A Tool for Analyzing Opinions in a Text Document
-Version: 1.0.2
+Version: 1.0.3
 Author: Monsuru Adepeju [cre, aut],
 Maintainer: Monsuru Adepeju <monsuur2010@yahoo.com>
 Description: This tool analyzes the opinions inherent in a text document
@@ -26,6 +26,6 @@ RoxygenNote: 7.1.1
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2021-03-04 12:49:40 UTC; monsu
+Packaged: 2021-03-05 21:45:53 UTC; monsu
 Repository: CRAN
-Date/Publication: 2021-03-05 09:20:02 UTC
+Date/Publication: 2021-03-05 22:10:03 UTC
