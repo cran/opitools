@@ -1,0 +1,468 @@
+---
+title: "Assessing the impacts of COVID-19 pandemic on public opinion concerning policing using Twitter data - A demonstration using `'Opitools'` package"
+
+author: |
+  | `Author:`
+  | `Adepeju, M.`
+  | `Big Data Centre, Manchester Metropolitan University, Manchester, M15 6BH`
+  
+date: |
+  | `Date:`
+  | ``r Sys.Date()``
+
+output:
+  rmarkdown::html_vignette
+  
+#output:
+  #pdf_document: default
+  
+#dev: png
+#output:
+  #word_document: default
+  #always_allow_html: yes
+#  pdf_document: default
+always_allow_html: yes
+#fig_caption: yes
+bibliography: references.bib
+
+abstract: The lack of tools for analyzing cross-impacts of different subjects on the opinions expressed in a text document, facilitates the development of `'opitool'` package. As an example, given a specific subject A and a text document downloaded with respect to it, a researcher may want to assess whether the opinion expressed concerning another subject B in relation to subject A has impacted the overall opinions on subject A in a significant way. For a real-life example, we can examine whether the public opinion expressed concerning neighbourhood policing (as subject A) has been impacted significantly by the public concerns around COVID-19 pandemic (as subject B) (see Adepeju and Jimoh, 2021). This document describes how the `opitools` package has been deployed to answer the aforementioned research question.
+
+
+vignette: >
+  %\VignetteIndexEntry{A guide to measuring long-term inequality in the exposure to crime at micro-area levels using 'Akmedoids' package}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+<style type="text/css">
+
+h1.title {
+  font-size: 26px;
+  line-height: 130%;
+  color: Black;
+  text-align: center;
+}
+
+h2.subtitle {
+  font-size: 13px;
+  line-height: 120%;
+  color: Black;
+  text-align: center;
+}
+
+h4.author { /* Header 4 - and the author and data headers use this too  */
+  font-size: 17px;
+  font-family: "Arial";
+  color: Black;
+  text-align: center;
+}
+h4.date { /* Header 4 - and the author and data headers use this too  */
+  font-size: 17px;
+  font-family: "Arial", Times, serif;
+  color: Black;
+  text-align: center;
+}
+
+h4.abstract { /* Header 4 - and the author and data headers use this too  */
+  font-size: 10px;
+  font-family: "Arial", Times, serif;
+  color: black;
+  text-align: center;
+}
+
+h4.institute{ /* Header 4 - and the author and data headers use this too  */
+  font-size: 10px;
+  font-family: "Arial", Times, serif;
+  color: black;
+  text-align: center;
+}
+
+body, td {
+   font-size: 14px;
+}
+code.r{
+  font-size: 13px;
+}
+pre {
+  font-size: 13px
+}
+h1 { /* Header 1 */
+  font-size: 16px;
+  color: DarkBlue;
+}
+h2 { /* Header 2 */
+    font-size: 16px;
+  color: DarkBlue;
+}
+h3 { /* Header 3 */
+  font-size: 15px;
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+
+</style>
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r functions, include=FALSE}
+# A function for captioning and referencing images
+fig <- local({
+    i <- 0
+    ref <- list()
+    list(
+        cap=function(refName, text) {
+            i <<- i + 1
+            ref[[refName]] <<- i
+            paste("Figure ", i, ": ", text, sep="")
+        },
+        ref=function(refName) {
+            ref[[refName]]
+        })
+})
+```
+
+
+
+# Introduction
+
+The `opitools` is an opinion analytical toolset designed for assessing cross-impacts of multiple subjects on the expressed opinions in a text documents (OTD). An OTD (input as `textdoc`) should composed of individual text records on a specified subject (A). A twitter-based OTD can be downloaded by search tweets that contain a set of hashtags or keywords relating to the subject. Several other subjects may be referenced in relation to the main subject (A). Any of these other subjects (secondary) can also be identified by the keywords relating to them mentioned in the text records. So, `opitool` package can be used to assess the impacts that any of the secondary subjects has exerted on the overall opinion relating to the main subject (A). An example of this research problem is demonstrated [@Adepeju2021], in which we assess how `COVID-19 pandemic` (as a secondary subject) has impacted the public opinion concerning neighbourhood policing (as the primary subject) across England and Wales?' The `opitools` may be used to answer similar questions with respect to several other public services in order to unravel important issues that may be driving public confidence and trust in the services. 
+
+
+
+# Downloading Twitter data
+
+The `rtweet` R-package [@Kearney2019] is used to download Twitter data. The package provides access to  Twitter API for data download. The code section below can be used to download tweets for a pre-defined geographical coverage (lat:'53.805,long:-4.242,radius: 350mi') for the last seven days (free). We downloaded tweets relating to 'neighbourhood policing', by searching for any tweets which include any of the keywords; {"`police`", "`policing`", "`law enforcement`"}. Note: A user needs to first secure access to Twitter developer platform (from [here](https://developer.twitter.com/en/apply-for-access)), then follow the instructions on this [page](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide) on how to obtain a set of tokens (keys) required to actually connect to the Twitter API.
+
+### Setting the Working directory
+
+```{r, message=FALSE, eval=FALSE}
+WORKING_DIR <- 'C:/R/Github/JGIS_Policing_COVID-19'
+
+#setting working directory
+setwd(WORKING_DIR)
+```
+
+
+### Installing libraries
+```{r, include=TRUE, message=FALSE, eval=TRUE}
+
+library(opitools) #for impact analysis
+#library(rtweet) #for data download
+#library(twitteR) #for setting up Twitter authorization
+#library(wordcloud2)
+#library(tibble)
+#library(tm)
+#library(dplyr)
+
+```
+
+
+### Running essential function and define tokens
+
+Free Twitter developer accounts has a restriction of 18,000 tweets per 15 minutes, otherwise a user may temporarily loose access to the API connection. It is therefore important to wait for 15 minutes after every 18,000 tweets downloads. First run the `waitFun()` function (below) to help ensure that the download rule is not violated. 
+
+```{r, message=FALSE, eval=FALSE}
+
+#Run function 
+waitFun <- function(x){
+  p1 <- proc.time()
+  Sys.sleep(x)
+  proc.time() - p1
+}
+
+#specify tokens and authorize
+#Note: replace asterisk with real keys
+
+consumer_key <- '*******************************' 
+consumer_secret <- '*******************************'
+access_token <- '*******************************'
+access_secret <- '*******************************'
+
+setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
+
+token <- create_token(
+  app = "AppName", #App name
+  consumer_key = consumer_key,
+  consumer_secret = consumer_secret)
+
+```
+
+
+### Start download
+
+
+```{r, message=FALSE, eval=FALSE}
+
+#Define the keywords for subject A
+keywords <- c("police", "policing", "law enforcement")
+
+#tweets holder
+all_Tweets <- NULL
+
+#Loop through each keyword and wait for 15 minutes 
+#and row-bind the results 
+for(i in seq_len(length(keywords))){
+  
+  tweets_g1 <- NULL
+
+  #actual download codes
+  tweets_g1 <- search_tweets(q=keywords[i],  n=17500, type="recent", include_rts=TRUE, 
+                             token = token, lang="en",geocode='53.805,-4.242,350mi')
+  
+  if(nrow(tweets_g1)!=0){
+    tweets_g1 <- tweets_g1 %>% dplyr::mutate(class=keywords[i])
+    all_Tweets <- rbind(all_Tweets, tweets_g1)
+  }
+  
+  flush.console()
+  print(paste(nrow(tweets_g1), nrow(tweets_g1), sep="||"))
+  print("waiting for 15.5 minutes")
+  waitFun(960)
+}
+
+#save the output
+write_as_csv(all_Tweets, "tweets.csv", na="NA", fileEncoding = "UTF-8")
+
+```
+
+# Exploration of a text document
+
+Following the data download, a user may wish to explore the characteristics of the word usage within the text document. "How is the pattern of word usage of a social media text document compared with a typical natural language document?" This research question can be answered by examining the log rank-frequency, i.e. the Zipf’s distribution [@Zipf1936]) plot of the document. By the Zipf’s distribution, we expect the frequency of a word contained in the document to be inversely proportional to its rank in a frequency table. The `word_distrb` function of `opitools` can be used to generate Zipf's distribution plot (e.g Figure `r fig$ref("figs1")`).   
+
+```{r, message=FALSE, include = TRUE, eval=FALSE}
+
+#using a randomised Twitter data from 'opitools'
+
+#data(tweets)
+
+tweets_dat <- as.data.frame(tweets[,1])
+
+plt = word_distrib(textdoc = tweets_dat)
+
+#to show the plot, type:
+
+#>plt$plot
+
+```
+
+```{r figs1, echo=FALSE, fig.width=5,fig.height=6,fig.align="center", fig.cap=fig$cap("figs1", "Data freq. plot vs. Zipf's distribution")}
+knitr::include_graphics("zipf.png")
+```
+
+For a natural language text, the Zipf's distribution plot has a negative slope with all points falling on a straight line. Any deviation from this ideal trend line can be attributed to imperfections in the word usage. For example, the presence of a wide range of strange terms or made-up words can cause an imperfection of the text document. From Figure `r fig$ref("figs1")` the graph can be divided into the three sections: the upper, the middle and the lower sections. By fitting a regression line (an the ideal Zipf's distribution), we can see what the slope of the upper section is quite different from the middle and the lower sections of the graph. The deviation at the high rank indicate an imperfection because a corpus of English language would generally contain adequate number of common words, such as 'the', 'of', and 'at', in order to ensure alignment on a straight line. For social media data, this deviation can suggests a significant use of a wide range of abbreviation of common words, e.g. using "&" or "nd" instead of the word "and". Apart from the small deviation at the upper section of the graph, we can state that the law holds within most parts of our Twitter text document.
+
+
+# Impact Analysis
+
+Now, in order to assess the impacts of COVID-19 pandemic (a secondary subject) on the main subject of the text document, i.e. neighbourhood policing, We need to first identify keywords that relate to the former. A user can employ any relevant analytical approach in order to identify such keywords. An example of a tool that can be used is the `wordcloud`, which may be used to reveal important words from within a text document.
+
+```{r, message=FALSE, include = TRUE, eval=FALSE}
+
+dat <- list(tweets_dat)
+
+series <- tibble()
+
+#tokenize document
+series <- tibble(text = as.character(unlist(dat)))%>%
+  unnest_tokens(word, text)%>% #tokenize
+  dplyr::select(everything())
+
+#removing stopwords
+tokenize_series <- series[!series$word %in% stopwords("english"),]
+
+#compute term frequencies
+doc_words <- tokenize_series %>%
+  dplyr::count(word, sort = TRUE) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(len=nchar(word)) %>% 
+  #remove words with character length <= 2
+  dplyr::filter(len > 2)%>%
+  data.frame() %>%
+  dplyr::rename(freq=n)%>%
+  dplyr::select(-c(len))%>%
+  #removing the words, '' & '' because of 
+  #their dominance
+  dplyr::filter(!word %in% c("police", "policing")) 
+
+
+row.names(doc_words) <- doc_words$word
+
+#use only the top 1000 words
+wordcloud2(data=doc_words[1:1000,], size = 0.7, shape = 'pentagon')
+
+```
+
+```{r figs2, echo=FALSE, fig.width=3,fig.height=4,fig.align="center", fig.cap=fig$cap("figs2", "Detecting important words from within the document")}
+knitr::include_graphics("wordcloud.png")
+```
+
+From the  `wordcloud` (i.e. `r fig$ref("figs2")`), the size of the words represent their respective frequencies (importance) across the document. Keywords relating to the COVID-19 pandemic are circled in red. In similar fashion, a user can identify keywords that relate to several other subjects that may have impacted neighbourhood policing during the data period. A list of `COVID-19 pandemic` related keywords are supplied with the `opitools` package. They can be assessed by typing: 
+
+
+```r
+
+> covid_keys 
+
+#          keys
+#1     pandemic
+#2    pandemics
+#3     lockdown
+#4    lockdowns
+#5       corona
+#6  coronavirus
+#7        covid
+#8      covid19
+#9     covid-19
+#10       virus
+#11     viruses
+#12  quarantine
+#13      infect
+#14     infects
+#15   infecting
+#16    infected
+
+```
+
+The impact analysis can be performed as follows: 
+
+```{r, message=FALSE, include = TRUE, eval=FALSE}
+
+# call data
+data(tweets)
+
+# Get an n x 1 text document
+tweets_dat <- as.data.frame(tweets[,1])
+
+# Run the analysis
+
+output <- opi_impact(tweets_dat, sec_keywords=covid_keys, metric = 1,
+                       fun = NULL, nsim = 99, alternative="two.sided",
+                       quiet=TRUE)
+                       
+```
+
+To print results: 
+
+```{r, echo=TRUE, message=FALSE, eval=FALSE}
+output
+
+#> $test
+#> [1] "Test of significance (Randomization testing)"
+#> 
+#> $criterion
+#> [1] "two.sided"
+#> 
+#> $exp_summary
+#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#>  -27.80  -26.52  -26.10  -26.13  -25.75  -24.26 
+#> 
+#> $p_table
+#> 
+#> 
+#> observed_score   S_beat   nsim   pvalue   signif 
+#> ---------------  -------  -----  -------  -------
+#> -28.23           0        99     0.01     ***    
+#> 
+#> $p_key
+#> [1] "0.99'"   "0.05*"   "0.025**" "0.01***"
+#> 
+#> $p_formula
+#> [1] "(S_beat + 1)/(nsim + 1)"
+```
+
+* The descriptions of output variables are as follow:
+
+  + `test` - title of the analysis
+
+  + `criterion` - criterion for determining the significance value
+
+  + `exp_summary` - summary of expected opinion scores
+  
+  + `p_table` - details of Statistical Significance
+
+  + `p_key` - keys for interpreting the statistical significance value
+
+  + `p_formula` - function of opinion score employed
+  
+  + `plot` - plot showing Percentage proportion of classes
+
+
+The output shows that COVID-19 pandemic has had a significant impacts on the public opinion concerning neighbourhood policing. This is indicated by the opinion scores -28.23 and a `pvalue` of 0.01. To display the graphics showing the proportion of various sentiment classes (as in Figure `r fig$ref("figs3")`), type `output$plot` in the console.
+
+```{r figs3, echo=FALSE, fig.width=5,fig.height=6,fig.align="center", fig.cap=fig$cap("figs3", "Percentage proportion of classes")}
+knitr::include_graphics("likert.png")
+```
+
+
+
+## Using a user-defined opinion score function
+
+As the definition of opinion score function may vary from one application field to another, a user can specify a pre-defined opinion score function. For instance, [@Razorfish2019] defines opinion score of a product brand as `score = (P + O - N)/(P + O + N)`, where `P`, `O`, and `N`, represent the amount/proportion of positive, neutral and negative, sentiments, respectively. Using a user-define function, the analysis can be re-run as follows: 
+
+First define the function: 
+
+```{r, echo=TRUE, message=FALSE, eval=FALSE}
+
+#define opinion score function
+myfun <- function(P, N, O){
+   score <- (P + O - N)/(P + O + N)
+   return(score)
+}
+
+```
+
+Re-run impact analysis
+
+```{r, echo=TRUE, message=FALSE, eval=FALSE}
+
+results <- opi_impact(tweets_dat, sec_keywords=covid_keys, metric = 5,
+                       fun = myfun, nsim = 99, alternative="two.sided",
+                       quiet=TRUE)
+```
+
+
+Print results: 
+
+```{r, echo=TRUE, message=FALSE, eval=FALSE}
+
+print(results)
+
+#> $test
+#> [1] "Test of significance (Randomization testing)"
+#> 
+#> $criterion
+#> [1] "two.sided"
+#> 
+#> $exp_summary
+#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#>  -27.80  -26.52  -26.10  -26.13  -25.75  -24.26 
+#> 
+#> $p_table
+#> 
+#> 
+#> observed_score       S_beat   nsim   pvalue   signif 
+#> -------------------  -------  -----  -------  -------
+#> -0.234129692832764   99       99     1        NA     
+#> 
+#> $p_key
+#> [1] "0.99'"   "0.05*"   "0.025**" "0.01***"
+#> 
+#> $p_formula
+#> [1] "(S_beat + 1)/(nsim + 1)"
+
+```
+
+Based on the user defined opinion score function, the new opinion score is estimated as -0.234, while the `pvalue` now equals to 1 (non-significant). This implies that the outcome of whether a secondary subject has had a significant impact on the primary subject is also dependent on the opinion score function specified.
+
+
+# Conclusion
+
+The `opitools` package has been developed in order to aid the replication of the study [@Adepeju2021] for other application fields. In essence, the utility of the functions contained in this package is not limited to law enforcement(s) and public health, but rather can be applicable to several other public services more generally. This package is being updated on a regular basis to add more functionalities. 
+
+We encourage users to report any bugs encountered while using the package so that they can be fixed immediately. Welcome contributions to this package which will be acknowledged accordingly. 
+
+# References
