@@ -1,10 +1,8 @@
-#' @title To simulate the opinion expectation distribution
-#' of a text document.
-#' @description Given a text document concerning two identified
-#' subjects (primary subject `A` and secondary subject `B`),
-#' this function simulates the expectation distribution of the
+#' @title Simulates the opinion expectation distribution
+#' of a digital text document.
+#' @description This function simulates the expectation distribution of the
 #' observed opinion score (computed using the `opi_score` function).
-#' The resulting tidy-format dataframe is described as the
+#' The resulting tidy-format dataframe can be described as the
 #' `expected sentiment document (ESD)` (Adepeju and Jimoh, 2021).
 #' @param osd_data A list (dataframe). An \code{n} x \code{3}
 #' OSD, in which \code{n} represents the length of the
@@ -15,7 +13,7 @@
 #' negative, or neutral), while column \code{3} contains two
 #' variables: `present` and `absent` indicating records that
 #' include and records that do not include any of the specified
-#' secondary keywords, respectively.
+#' theme keywords, respectively.
 #' @param nsim (an integer) Number of replicas (ESD) to simulate.
 #' Recommended values are: 99, 999, 9999, and so on. Since the run time
 #' is proportional to the number of replicas, a moderate number of
@@ -36,12 +34,12 @@
 #' #Prepare an osd data from the output
 #' #of `opi_score` function.
 #'
-#' score <- opi_score(textdoc = policing_otd,
+#' score <- opi_score(textdoc = policing_dtd,
 #'                      metric = 1, fun = NULL)
 #' #extract OSD
 #' OSD <- score$OSD
 #' #note that `OSD` is shorter in length
-#' #than `policing_otd`, meaning that some
+#' #than `policing_dtd`, meaning that some
 #' #text records were not classified
 #'
 #' #Bind a fictitious indicator column

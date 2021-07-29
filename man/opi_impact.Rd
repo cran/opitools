@@ -2,10 +2,10 @@
 % Please edit documentation in R/opi_impact.R
 \name{opi_impact}
 \alias{opi_impact}
-\title{Impact analysis of subject B on the opinion expressed
-concerning subject A in a text document}
+\title{Statistical assessment of
+impacts of a specified theme from a DTD.}
 \usage{
-opi_impact(textdoc, sec_keywords=NULL, metric = 1,
+opi_impact(textdoc, theme_keys=NULL, metric = 1,
 fun = NULL, nsim = 99, alternative="two.sided",
 quiet=TRUE)
 }
@@ -14,9 +14,10 @@ quiet=TRUE)
 individual text records, where \code{n} is the total
 number of individual records.}
 
-\item{sec_keywords}{(a list) A one-column dataframe (of any
+\item{theme_keys}{(a list) A one-column dataframe (of any
 number of length) containing a list of keywords relating
-to the secondary subject (subject \code{B}).}
+to the theme or secondary subject to be investigated.
+The keywords can also be defined as a vector of characters.}
 
 \item{metric}{(an integer) Specify the metric to utilize
 for the calculation of opinion score. Default: \code{1}.
@@ -46,7 +47,7 @@ score bounded by positive values, such as when
 should be set as "greater", and set as "less" otherwise.
 If metric parameter is set equal to \code{5}, with a user-defined
 opinion score function (i.e. \code{fun} not NULL ), the user is required
-to determine the boundary of the opinion scores, and set the
+to determine the limits of the opinion scores, and set the
 \code{alternative} argument appropriately.}
 
 \item{quiet}{(TRUE or FALSE) To suppress processing
@@ -58,18 +59,14 @@ of a secondary subject \code{B} on the opinion concerning the
 primary subject \code{A}.
 }
 \description{
-This function assesses the impacts of a subject
-B (a secondary subject) on the opinion concerning subject A
-(the primary subject) in a text document. Keywords relating
-to the secondary subject, can be identified  using any
-analytical techniques, such as the frequency analysis.
-The keywords should then be collated provide as input into
-this function (see below). The subject A (primary subject)
-is usually the main theme of the text document. For instance,
-by downloading Twitter data that include a set of related
-hashtags; e.g. ’#police’, ’#policing’ and/or ’#law enforcement’,
-then "Police or Policing" forms the primary subject of the
-downloaded text document.
+This function assesses the impacts of a theme
+(or subject) on the overall opinion computed for a DTD
+Different themes in a DTD can be identified by the keywords
+used in the DTD. These keywords (or words) can be extracted by
+any analytical means available to the users, e.g.
+\code{word_imp} function. The keywords must be collated and
+supplied this function through the \code{theme_keys} argument
+(see below).
 }
 \details{
 This function calculates the statistical
@@ -83,19 +80,27 @@ in which their expected scores are than the observed score (See
 further details in Adepeju and Jimoh, 2021).
 }
 \examples{
-#test document: 'policing_otd'
-#list of keywords: 'covid_keys'
 
-output <- opi_impact(textdoc = policing_otd,
-          sec_keywords=covid_keys, metric = 1,
+# Application in marketing:
+
+#`data` -> 'reviews_dtd'
+#`theme_keys` -> 'refreshment_theme'
+
+#RQ2a: "Do the refreshment outlets impact customers'
+#opinion of the services at the Piccadilly train station?"
+
+##execute function
+output <- opi_impact(textdoc = reviews_dtd,
+          theme_keys=refreshment_theme, metric = 1,
           fun = NULL, nsim = 99, alternative="two.sided",
           quiet=TRUE)
 
-#check output variables
+#To print results
 print(output)
 
-#to access the pvalue
+#extracting the pvalue in order to answer RQ2a
 output$pvalue
+
 
 }
 \references{

@@ -1,23 +1,20 @@
-#' @title Impact analysis of subject B on the opinion expressed
-#' concerning subject A in a text document
-#' @description This function assesses the impacts of a subject
-#' B (a secondary subject) on the opinion concerning subject A
-#' (the primary subject) in a text document. Keywords relating
-#' to the secondary subject, can be identified  using any
-#' analytical techniques, such as the frequency analysis.
-#' The keywords should then be collated provide as input into
-#' this function (see below). The subject A (primary subject)
-#' is usually the main theme of the text document. For instance,
-#' by downloading Twitter data that include a set of related
-#' hashtags; e.g. ’#police’, ’#policing’ and/or ’#law enforcement’,
-#' then "Police or Policing" forms the primary subject of the
-#' downloaded text document.
+#' @title Statistical assessment of
+#' impacts of a specified theme from a DTD.
+#' @description This function assesses the impacts of a theme
+#' (or subject) on the overall opinion computed for a DTD
+#' Different themes in a DTD can be identified by the keywords
+#' used in the DTD. These keywords (or words) can be extracted by
+#' any analytical means available to the users, e.g.
+#' `word_imp` function. The keywords must be collated and
+#' supplied this function through the `theme_keys` argument
+#' (see below).
 #' @param textdoc An \code{n} x \code{1} list (dataframe) of
 #' individual text records, where \code{n} is the total
 #' number of individual records.
-#' @param sec_keywords (a list) A one-column dataframe (of any
+#' @param theme_keys (a list) A one-column dataframe (of any
 #' number of length) containing a list of keywords relating
-#' to the secondary subject (subject \code{B}).
+#' to the theme or secondary subject to be investigated.
+#' The keywords can also be defined as a vector of characters.
 #' @param metric (an integer) Specify the metric to utilize
 #' for the calculation of opinion score. Default: \code{1}.
 #' See detailed documentation
@@ -43,27 +40,36 @@
 #' should be set as "greater", and set as "less" otherwise.
 #' If metric parameter is set equal to \code{5}, with a user-defined
 #' opinion score function (i.e. `fun` not NULL ), the user is required
-#' to determine the boundary of the opinion scores, and set the
+#' to determine the limits of the opinion scores, and set the
 #' `alternative` argument appropriately.
 #' @param quiet (TRUE or FALSE) To suppress processing
 #' messages. Default: \code{TRUE}.
-#' @usage opi_impact(textdoc, sec_keywords=NULL, metric = 1,
+#' @usage opi_impact(textdoc, theme_keys=NULL, metric = 1,
 #' fun = NULL, nsim = 99, alternative="two.sided",
 #' quiet=TRUE)
-#' @examples
-#' #test document: 'policing_otd'
-#' #list of keywords: 'covid_keys'
 #'
-#' output <- opi_impact(textdoc = policing_otd,
-#'           sec_keywords=covid_keys, metric = 1,
+#' @examples
+#'
+#' # Application in marketing:
+#'
+#' #`data` -> 'reviews_dtd'
+#' #`theme_keys` -> 'refreshment_theme'
+#'
+#' #RQ2a: "Do the refreshment outlets impact customers'
+#' #opinion of the services at the Piccadilly train station?"
+#'
+#' ##execute function
+#' output <- opi_impact(textdoc = reviews_dtd,
+#'           theme_keys=refreshment_theme, metric = 1,
 #'           fun = NULL, nsim = 99, alternative="two.sided",
 #'           quiet=TRUE)
 #'
-#' #check output variables
+#' #To print results
 #' print(output)
 #'
-#' #to access the pvalue
+#' #extracting the pvalue in order to answer RQ2a
 #' output$pvalue
+#'
 #'
 #' @details This function calculates the statistical
 #' significance value (\code{p-value}) of an opinion score
@@ -95,12 +101,16 @@
 
 #' @export
 
-opi_impact <- function(textdoc, sec_keywords=NULL, metric = 1,
+opi_impact <- function(textdoc, theme_keys=NULL, metric = 1,
                        fun = NULL, nsim = 99, alternative="two.sided",
                        quiet=TRUE){ #tweets
 
   keywords <- text <- ID <- sentiment<-flush.console <-
     desc <- asterisk <- comb <- NULL
+
+  if(!is.null(theme_keys)){
+    theme_keys <- data.frame(theme_keys)
+  }
 
   #output holder
   output <- list()
@@ -115,8 +125,8 @@ opi_impact <- function(textdoc, sec_keywords=NULL, metric = 1,
                "number of simulations (nsim)!!", sep=" "))
   }
 
-  if(is.null(sec_keywords)){
-    stop(" 'sec_keywords' parameter cannot be 'NULL'!! ")
+  if(is.null(theme_keys)){
+    stop(" 'theme_keys' parameter cannot be 'NULL'!! ")
   }
 
   #check any contradiction in tail comparison
@@ -132,10 +142,10 @@ opi_impact <- function(textdoc, sec_keywords=NULL, metric = 1,
   }
 
   #format keywords
-  sec_keywords <- data.frame(as.character(sec_keywords[,1]))
-  colnames(sec_keywords) <- "keys"
-  sec_keywords <-
-    as.character(sec_keywords %>% map_chr(~ str_c(., collapse = "|")))
+  theme_keys <- data.frame(as.character(theme_keys[,1]))
+  colnames(theme_keys) <- "keys"
+  theme_keys <-
+    as.character(theme_keys %>% map_chr(~ str_c(., collapse = "|")))
 
   #format text records
   textdoc <- data.frame(textdoc[,1])
@@ -146,7 +156,7 @@ opi_impact <- function(textdoc, sec_keywords=NULL, metric = 1,
   #textdoc_keyabsent': contains no keywords
 
   textdoc_keypresent <- data.frame(textdoc) %>%
-    filter(str_detect(text, sec_keywords, negate=FALSE)) %>%
+    filter(str_detect(text, theme_keys, negate=FALSE)) %>%
     mutate(keywords = "present")
 
   if(nrow(textdoc_keypresent)==0){
@@ -155,7 +165,7 @@ opi_impact <- function(textdoc, sec_keywords=NULL, metric = 1,
   }
 
   textdoc_keyabsent <- data.frame(textdoc) %>%
-    filter(stringr::str_detect(text, sec_keywords, negate=TRUE))%>%
+    filter(stringr::str_detect(text, theme_keys, negate=TRUE))%>%
     mutate(keywords = "absent")
 
 
@@ -226,7 +236,7 @@ opi_impact <- function(textdoc, sec_keywords=NULL, metric = 1,
     pres_abs <- unique(OSD_joined$keywords)
 
     if(length(pres_abs) == 1){
-      stop(paste("The 'sec_keywords' are either completely present",
+      stop(paste("The 'theme_keys' are either completely present",
                  "or absent in a sentiment class! The process terminated!!",
                  sep=" "))
     }

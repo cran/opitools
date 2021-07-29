@@ -2,8 +2,8 @@
 % Please edit documentation in R/opi_sim.R
 \name{opi_sim}
 \alias{opi_sim}
-\title{To simulate the opinion expectation distribution
-of a text document.}
+\title{Simulates the opinion expectation distribution
+of a digital text document.}
 \usage{
 opi_sim(osd_data, nsim=99, metric = 1, fun = NULL, quiet=TRUE)
 }
@@ -17,7 +17,7 @@ column \code{2} shows the sentiment classes (i.e. positive,
 negative, or neutral), while column \code{3} contains two
 variables: \code{present} and \code{absent} indicating records that
 include and records that do not include any of the specified
-secondary keywords, respectively.}
+theme keywords, respectively.}
 
 \item{nsim}{(an integer) Number of replicas (ESD) to simulate.
 Recommended values are: 99, 999, 9999, and so on. Since the run time
@@ -42,11 +42,9 @@ Returns a list of expected opinion scores with length equal
 to the number of simulation (\code{nsim}) specified.
 }
 \description{
-Given a text document concerning two identified
-subjects (primary subject \code{A} and secondary subject \code{B}),
-this function simulates the expectation distribution of the
+This function simulates the expectation distribution of the
 observed opinion score (computed using the \code{opi_score} function).
-The resulting tidy-format dataframe is described as the
+The resulting tidy-format dataframe can be described as the
 \verb{expected sentiment document (ESD)} (Adepeju and Jimoh, 2021).
 }
 \details{
@@ -59,12 +57,12 @@ opinion scores (see details in Adepeju and Jimoh 2021).
 #Prepare an osd data from the output
 #of `opi_score` function.
 
-score <- opi_score(textdoc = policing_otd,
+score <- opi_score(textdoc = policing_dtd,
                      metric = 1, fun = NULL)
 #extract OSD
 OSD <- score$OSD
 #note that `OSD` is shorter in length
-#than `policing_otd`, meaning that some
+#than `policing_dtd`, meaning that some
 #text records were not classified
 
 #Bind a fictitious indicator column
